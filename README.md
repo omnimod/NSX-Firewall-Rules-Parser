@@ -9,7 +9,7 @@ Use PowerShell commandlet Parse-NSXRules.ps1 to parse NSX XML export.
 _Parse-NSXRules.ps1 -FilePath \<string\> [-ResultPath \<string\>] [-Property \<string\>] [-Format \<string\>]_
 
 Parameters:
--  -FilePath \<string\>   - (mandatory) Specify path to the pcoip_server log file.
+-  -FilePath \<string\>   - (mandatory) Specify path to the XML file.
 -  -ResultPath \<string\> - (mandatory) Specify path to export results to the file.
 -  -Property \<string\> - (optional) Select properties to display, separated by commas.
 -  -Format \<string\>     - (optional) Specify the report format. Supported values are: CSV or HTML. By default data is saved in the HTML format.
