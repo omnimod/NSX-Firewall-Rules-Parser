@@ -12,7 +12,7 @@ Parameters:
 -  -FilePath \<string\>   - (mandatory) Specify path to the pcoip_server log file.
 -  -ResultPath \<string\> - (mandatory) Specify path to export results to the file.
 -  -Property \<string\> - (optional) Select properties to display, separated by commas.
--  -Format \<string\>     - (optional) Specify the report format. Supported values are: CSV, HTML or TEXT. By default data is saved in the TEXT format.
+-  -Format \<string\>     - (optional) Specify the report format. Supported values are: CSV or HTML. By default data is saved in the HTML format.
 
 Examples:
 
