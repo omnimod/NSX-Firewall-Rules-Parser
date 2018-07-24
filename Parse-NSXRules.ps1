@@ -1,4 +1,4 @@
-	<#
+<#
 		.SYNOPSIS
 		This is a simple PowerShell command to parse NSX firewall rules
 
@@ -15,7 +15,7 @@
 		
 		.LINK
 		https://github.com/omnimod/NSX-Firewall-Rules-Parser
-	#>
+#>
 
 Param(
 		[Parameter(Mandatory=$True,
