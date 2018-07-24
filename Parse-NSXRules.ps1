@@ -3,7 +3,7 @@
 		This is a simple PowerShell command to parse NSX firewall rules
 
 		.PARAMETER FilePath
-		Specifies the path to the pcoip_server log file.
+		Specifies the path to the exported NSX rules.
 		
 		.EXAMPLE
 		parse-nsxrules.ps1 -FilePath C:\Temp\NSX_rules.xml -Format HTML -ResultPath C:\Temp\parsed_rules.html
