@@ -1,44 +1,54 @@
-<#
+	<#
 		.SYNOPSIS
 		This is a simple PowerShell command to parse NSX firewall rules
 
 		.PARAMETER FilePath
-		Specifies the path to the exported NSX rules.
+		Specifies the path to the pcoip_server log file.
 		
 		.EXAMPLE
-		parse-nsxrules.ps1 -FilePath C:\Temp\NSX_rules.xml -Format HTML -ResultPath C:\Temp\parsed_rules.html
-		Description
+		.\parse-nsxrules.ps1 -FilePath C:\Temp\NSX_rules.xml -Format HTML -ResultPath C:\Temp\parsed_rules.html
 		
-		-----------
+		.DESCRIPTION
 		
-		Parse XML file and export result as a HTML file
+		The Parse-NSXRules cmdlet converts the regular XML exported NSX firewall rules to the HTML or CSV format for better readability
 		
 		.LINK
 		https://github.com/omnimod/NSX-Firewall-Rules-Parser
-#>
+	#>
 
 Param(
-		[Parameter(Mandatory=$True,
-		Position=0,
-		HelpMessage="Enter the path to the exported NSX firewall rules")]
-		[String] $FilePath,
-
-		[Parameter(Mandatory=$True,
-		Position=1,
-		HelpMessage="Enter the path where the result file will be saved")]	
-		[String] $ResultPath,
-
-		[Parameter(Position=2,
-		HelpMessage="Select properties to display, separated by commas")]	
-		[String] $Property = "",
+	[Parameter(Mandatory=$True,
+	Position=0,
+	HelpMessage="Enter the path where the result file will be saved")]	
+	[String] $ResultPath,
 		
-		[Parameter(Position=3,
-		HelpMessage="Specify the format of the result file. Could be HTML or CSV")]		
-		[ValidateSet("CSV", "HTML")]
-		[String]$Format = "HTML"
+	[Parameter(Position=1,
+	HelpMessage="Enter the path to the exported NSX firewall rules")]
+	[String] $FilePath,
+
+	[Parameter(Position=2,
+	HelpMessage="Select properties to display, separated by commas")]	
+	[String] $Property = "",
+	
+	[Parameter(Position=3,
+	HelpMessage="Specify the format of the result file. Could be HTML, CSV or XML")]		
+	[ValidateSet("CSV", "HTML", "XML")]
+	[String]$Format = "HTML",
+	
+	[Parameter(
+	HelpMessage="Specify the IP address or DNS name of NSX Manager")]		
+	[String]$NSXManager,
+	
+	[Parameter(
+	HelpMessage="Specify the username to connect to the NSX Manager")]		
+	[String]$Username,		
+	
+	[Parameter(
+	HelpMessage="Specify the password to connect to the NSX Manager")]		
+	[String]$Password	
 )
 
-#Convert array of objects to string
+#Convert an array of objects to string
 function Format-Entries ($entries) {
 	if($entries) {
 		$str = ""
@@ -86,7 +96,7 @@ function Format-Entries ($entries) {
 	}
 }
 
-#Create HTML document
+#Create a HTML document
 function Export-Html ($data) {
 	$title = "NSX Firewall Rules"
 	$head = "<style type='text/css'> table { border-collapse: collapse; } table, th, td { border: 1px solid black; } </style>"
@@ -119,7 +129,7 @@ function Parse-L3FWRules($sections) {
 
 	$result = @()
 	foreach ($section in $sections) {
-		$rules = $section.ChildNodes
+		$rules = $section.rule
 		foreach ($rule in $rules) {
 			$result += $rule | select @{Label="section"; Expression={
 						$section.name
@@ -148,11 +158,39 @@ function Parse-L3FWRules($sections) {
 	return $result
 }
 
-#########
-# Start #
-#########
+function Get-NSXFirewallConfig {
+	
+add-type @"
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+public class TrustAllCertsPolicy : ICertificatePolicy {
+public bool CheckValidationResult(
+ServicePoint srvPoint, X509Certificate certificate,
+WebRequest request, int certificateProblem) {
+return true;
+}
+}
+"@
 
-#Use different format to separate entries
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	
+	function Get-BasicAuthCreds {
+		param([string]$Username,[string]$Password)
+		$AuthString = "{0}:{1}" -f $Username,$Password
+		$AuthBytes  = [System.Text.Encoding]::Ascii.GetBytes($AuthString)
+		return [Convert]::ToBase64String($AuthBytes)
+	}
+	
+	$Credentials = Get-BasicAuthCreds -Username $Username -Password $Password
+	$Uri = "https://" + $NSXManager + "/api/4.0/firewall/globalroot-0/config"
+	$response = Invoke-WebRequest -Method Get -Uri $Uri -Headers @{"Authorization"="Basic $Credentials"}
+	
+	if($response.StatusCode -eq 200) {
+		return ($response.Content)
+	}
+}
+
 if($Format -eq "CSV") {
 	$eol = ", "
 }
@@ -160,8 +198,17 @@ else {
 	$eol = "`n"
 }
 
-$doc = [xml] (Get-Content $FilePath)
-$sections = $doc.firewallDraft.config.layer3Sections.ChildNodes
+if($FilePath -ne "") {
+	$doc = [xml] (Get-Content $FilePath)
+	$sections = $doc.firewallDraft.config.layer3Sections.section
+}
+elseif($NSXManager -ne $null) {
+	$doc = [xml] (Get-NSXFirewallConfig);
+	$sections = $doc.firewallConfiguration.layer3Sections.section
+}
+else {
+	return
+}
 
 $l3rules = Parse-L3FWRules($sections)
 
@@ -173,6 +220,7 @@ if($Property -ne "") {
 switch ($Format) {
 	"CSV"		{ $l3rules | Export-CSV -Path $ResultPath }
 	"HTML"		{ Export-Html($l3rules) > $ResultPath }
+	"XML"		{ $doc.OuterXml > $ResultPath }
 }
 
 return
