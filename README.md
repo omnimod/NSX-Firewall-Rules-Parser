@@ -4,15 +4,18 @@ This is a simple PowerShell command to parse NSX firewall rules.
 
 **Execution**
 --------
-Use PowerShell commandlet Parse-NSXRules.ps1 to parse NSX XML export.
+Use PowerShell commandlet Parse-NSXRules.ps1 to parse NSX XML export or connect to the NSX Manager and collect firewall rules.
 
 _Parse-NSXRules.ps1 -FilePath \<string\> [-ResultPath \<string\>] [-Property \<string\>] [-Format \<string\>]_
 
 Parameters:
--  -FilePath \<string\>   - (mandatory) Specify path to the XML file.
 -  -ResultPath \<string\> - (mandatory) Specify path to export results to the file.
--  -Property \<string\> - (optional) Select properties to display, separated by commas.
+-  -FilePath \<string\>   - (optional) Specify path to the XML file.
+-  -Property \<string\>   - (optional) Select properties to display, separated by commas.
 -  -Format \<string\>     - (optional) Specify the report format. Supported values are: CSV or HTML. By default data is saved in the HTML format.
+-  -NSXManager \<string\> - (optional) Specify the NSX Manager IP or DNS name.
+-  -Username \<string\>   - (optional) Specify the NSX Manager username.
+-  -Password \<string\>   - (optional) Specify the NSX Manager password.
 
 Examples:
 
