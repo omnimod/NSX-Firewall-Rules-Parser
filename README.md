@@ -29,7 +29,7 @@ Examples:
 
   #Connect to the NSX Manager, collect firewall rules and save result in XML format
   
-  _.\parse-nsxrules.ps1 -Format XML -ResultPath C:\Temp\parsed_rules.csv -NSXManager 192.168.1.10 -Username admin -Password VMware1!_
+  _.\parse-nsxrules.ps1 -Format XML -ResultPath C:\Temp\parsed_rules.xml -NSXManager 192.168.1.10 -Username admin -Password VMware1!_
 
 **Releases**
 --------
