@@ -12,7 +12,7 @@ Parameters:
 -  -ResultPath \<string\> - (mandatory) Specify path to export results to the file.
 -  -FilePath \<string\>   - (optional) Specify path to the XML file.
 -  -Property \<string\>   - (optional) Select properties to display, separated by commas.
--  -Format \<string\>     - (optional) Specify the report format. Supported values are: CSV or HTML. By default data is saved in the HTML format.
+-  -Format \<string\>     - (optional) Specify the report format. Supported values are: CSV, HTML or XML. By default data is saved in the HTML format.
 -  -NSXManager \<string\> - (optional) Specify the NSX Manager IP or DNS name.
 -  -Username \<string\>   - (optional) Specify the NSX Manager username.
 -  -Password \<string\>   - (optional) Specify the NSX Manager password.
@@ -26,6 +26,10 @@ Examples:
   #Parse XML file and export result as a CSV file, select only id,name,source and action columns
   
   _.\parse-nsxrules.ps1 -FilePath C:\Temp\NSX_rules.xml -Format CSV -ResultPath C:\Temp\parsed_rules.csv -Property "id,name,source,action"_
+
+  #Connect to the NSX Manager, collect firewall rules and save result in XML format
+  
+  _.\parse-nsxrules.ps1 -Format XML -ResultPath C:\Temp\parsed_rules.csv -NSXManager 192.168.1.10 -Username admin -Password VMware1!_
 
 **Releases**
 --------
